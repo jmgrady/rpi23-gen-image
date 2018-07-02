@@ -7,3 +7,11 @@ packages
 *.kate-swp
 ~*
 *.swp
+
+build-stretch-rpi3-x\.txt
+
+build-stretch-rpi3-tty\.txt
+
+stretch-rpi3-tty\.sh
+
+stretch-rpi3-x\.sh
