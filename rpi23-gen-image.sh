@@ -60,6 +60,7 @@ WLAN_FIRMWARE_DIR="${R}/lib/firmware/brcm"
 # General settings
 HOSTNAME=${HOSTNAME:=rpi${RPI_MODEL}-${DEBIAN_RELEASE}}
 PASSWORD=${PASSWORD:=raspberry}
+ROOTPASSWORD=${ROOTPASSWORD:=$PASSWORD}
 DEFLOCAL=${DEFLOCAL:="en_US.UTF-8"}
 TIMEZONE=${TIMEZONE:="Europe/Berlin"}
 
@@ -145,7 +146,7 @@ if [ "$RPI_MODEL" = 2 ] ; then
   KERNEL_IMAGE_TARGET=linuz.img
   QEMU_BINARY=/usr/bin/qemu-arm-static
   UBOOT_CONFIG=rpi_2_defconfig
-  
+
 elif [ "$RPI_MODEL" = 3 ] ; then
   DTB_FILE=broadcom/bcm2837-rpi-3-b.dtb
   DEBIAN_RELEASE_ARCH=arm64
@@ -155,7 +156,7 @@ elif [ "$RPI_MODEL" = 3 ] ; then
   KERNEL_IMAGE_TARGET=linux.uImage
   QEMU_BINARY=/usr/bin/qemu-aarch64-static
   UBOOT_CONFIG=rpi_3_defconfig
-  
+
 else
   echo "error: Raspberry Pi model ${RPI_MODEL} is not supported!"
   exit 1
