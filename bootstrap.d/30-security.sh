@@ -8,6 +8,7 @@
 # Generate crypt(3) password string
 # 500000 rounds for extra security. See https://michaelfranzl.com/2016/09/09/hashing-passwords-sha512-stronger-than-bcrypt-rounds/
 ENCRYPTED_PASSWORD=`mkpasswd -m sha-512 -R 100000 "${PASSWORD}"`
+ENCRYPTED_ROOTPASSWORD=`mkpasswd -m sha-512 -R 100000 "${ROOTPASSWORD}"`
 
 # Setup default user
 if [ "$ENABLE_USER" = true ] ; then
@@ -18,7 +19,7 @@ fi
 
 # Setup root password or not
 if [ "$ENABLE_ROOT" = true ] ; then
-  chroot_exec usermod -p "${ENCRYPTED_PASSWORD}" root
+  chroot_exec usermod -p "${ENCRYPTED_ROOTPASSWORD}" root
 
   if [ "$ENABLE_ROOT_SSH" = true ] ; then
     if [ "$REDUCE_SSHD" = false ] ; then # dropbear doesn't have this config file
