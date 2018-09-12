@@ -40,13 +40,14 @@ RPI_MODEL=${RPI_MODEL:=2}
 
 # Debian release
 DEBIAN_RELEASE=${DEBIAN_RELEASE:=stretch}
+BUILD_SUBDIR=${BUILD_SUBDIR:=$DEBIAN_RELEASE}
 
 # URLs
 FIRMWARE_URL=${FIRMWARE_URL:=https://github.com/raspberrypi/firmware/raw/master/boot}
 WLAN_FIRMWARE_URL=${WLAN_FIRMWARE_URL:=https://github.com/RPi-Distro/firmware-nonfree/raw/master/brcm}
 
 # Build directories
-BASEDIR="$(pwd)/images/${DEBIAN_RELEASE}"
+BASEDIR="$(pwd)/images/${BUILD_SUBDIR}"
 BUILDDIR="${BASEDIR}/build"
 
 # Chroot directories
