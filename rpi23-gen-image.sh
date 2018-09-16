@@ -42,6 +42,18 @@ RPI_MODEL=${RPI_MODEL:=2}
 DEBIAN_RELEASE=${DEBIAN_RELEASE:=stretch}
 BUILD_SUBDIR=${BUILD_SUBDIR:=$DEBIAN_RELEASE}
 
+if [ -z "${OS_VARIANT}" ] ; then
+  if [ "$DEBIAN_RELEASE" = "xenial" -o "$DEBIAN_RELEASE" = "bionic" ] ; then
+    OS_VARIANT="ubuntu"
+  elif [ "$DEBIAN_RELEASE" = "jessie" -o "$DEBIAN_RELEASE" = "stretch" ] ; then
+    OS_VARIANT="debian"
+  else
+    OS_VARIANT="unknown"
+  fi
+fi
+
+echo -n -e "\nBuilding image for ${OS_VARIANT}/${DEBIAN_RELEASE}"
+
 # URLs
 FIRMWARE_URL=${FIRMWARE_URL:=https://github.com/raspberrypi/firmware/raw/master/boot}
 WLAN_FIRMWARE_URL=${WLAN_FIRMWARE_URL:=https://github.com/RPi-Distro/firmware-nonfree/raw/master/brcm}
@@ -85,7 +97,16 @@ NET_NTP_2=${NET_NTP_2:=""}
 
 # APT settings
 APT_PROXY=${APT_PROXY:=""}
-APT_SERVER=${APT_SERVER:="ftp.debian.org"}
+
+if [ -z "${APT_SERVER}" ] ; then
+  if [ "$OS_VARIANT" = "debian" ] ; then
+    APT_SERVER="ftp.debian.org"
+  elif [ "$OS_VARIANT" = "ubuntu" ] ; then
+    APT_SERVER="launchpad.net"
+  else
+    echo -n -e "\n\nerror: no APT_SERVER specified."
+  fi
+fi
 
 # Feature settings
 ENABLE_CONSOLE=${ENABLE_CONSOLE:=true}
@@ -125,12 +146,19 @@ REDUCE_LOCALE=${REDUCE_LOCALE:=true}
 # Chroot scripts directory
 CHROOT_SCRIPTS=${CHROOT_SCRIPTS:=""}
 
+if [ "$OS_VARIANT" = "debian" ] ; then
+  KEYRING="debian-archive-keyring"
+elif [ "$OS_VARIANT" = "ubuntu "] ; then
+  KEYRING="ubuntu-keyring"
+fi
+
 # Packages required in the chroot build environment
 APT_INCLUDES=${APT_INCLUDES:=""}
-APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,debian-archive-keyring,systemd"
+APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,${KEYRING},systemd"
 
 # Packages required for bootstrapping  (host PC)
-REQUIRED_PACKAGES="debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git"
+REQUIRED_PACKAGES="debootstrap ${KEYRING} qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git"
+
 MISSING_PACKAGES=""
 
 

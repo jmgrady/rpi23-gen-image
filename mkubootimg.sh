@@ -1,0 +1,1 @@
+/home/grady/projects/rpi-workspace/u-boot/tools/mkimage -A arm64 -O linux -T script -C none -a 0x00000000 -e 0x00000000 -n RPi3 -d /home/grady/projects/rpi-workspace/rpi23-gen-image/images/stretch/build/chroot/boot/firmware/uboot.mkimage /home/grady/projects/rpi-workspace/rpi23-gen-image/images/stretch/build/chroot/boot/firmware/boot.scr

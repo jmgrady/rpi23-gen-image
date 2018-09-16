@@ -1,0 +1,8 @@
+deb http://%APT_SERVER%/ubuntu %DEBIAN_RELEASE% main contrib
+#deb-src http://%APT_SERVER%/ubuntu %DEBIAN_RELEASE% main contrib
+
+deb http://%APT_SERVER%/debian/ %DEBIAN_RELEASE%-updates main contrib
+#deb-src http://%APT_SERVER%/ubuntu/ %DEBIAN_RELEASE%-updates main contrib
+
+deb http://security.ubuntu.org/ubuntu %DEBIAN_RELEASE%/updates main contrib
+#deb-src http://security.ubuntu.org/ubuntu %DEBIAN_RELEASE%/updates main contrib
