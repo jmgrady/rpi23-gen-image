@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DEBIAN_RELEASE="xenial" \
-	      USER_NAME="grady" \
-	      PASSWORD="initpasswd" \
+	      USER_NAME="pi" \
+	      PASSWORD="raspberry" \
 	      ROOTPASSWORD="Nanki@p00" \
 	      TIMEZONE="America/New_York" \
 				APT_PROXY="localhost:3142" \
