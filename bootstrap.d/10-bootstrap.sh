@@ -19,7 +19,7 @@ if [ "$ENABLE_MINBASE" = true ] ; then
 fi
 
 # Base debootstrap (unpack only)
-http_proxy=${APT_PROXY} debootstrap --keep-debootstrap-dir --arch="${DEBIAN_RELEASE_ARCH}" --foreign ${VARIANT} --components="${COMPONENTS}" --include="${APT_INCLUDES}" "${DEBIAN_RELEASE}" "${R}" "http://${APT_SERVER}/${OS_VARIANT}"
+http_proxy=${APT_PROXY} debootstrap --arch="${DEBIAN_RELEASE_ARCH}" --foreign ${VARIANT} --components="${COMPONENTS}" --include="${APT_INCLUDES}" "${DEBIAN_RELEASE}" "${R}" "http://${APT_SERVER}/${OS_VARIANT}"
 
 # Copy qemu emulator binary to chroot
 install -m 755 -o root -g root "${QEMU_BINARY}" "${R}${QEMU_BINARY}"
@@ -29,7 +29,7 @@ mkdir -p "${R}/usr/share/keyrings"
 install_readonly /usr/share/keyrings/${KEYRING}.gpg "${R}/usr/share/keyrings/${KEYRING}.gpg"
 
 # Complete the bootstrapping process
-chroot_exec /debootstrap/debootstrap --second-stage --keep-debootstrap-dir
+chroot_exec /debootstrap/debootstrap --second-stage
 
 # Mount required filesystems
 mount -t proc none "${R}/proc"
