@@ -1,7 +1,6 @@
 #!/bin/bash
 
 DEBIAN_RELEASE="stretch" \
-				BUILD_SUBDIR="stretch-dev" \
 	      USER_NAME="grady" \
 	      PASSWORD="initpasswd" \
 	      ROOTPASSWORD="Nanki@p00" \

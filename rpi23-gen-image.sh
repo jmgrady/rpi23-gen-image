@@ -44,7 +44,7 @@ BUILD_SUBDIR=${BUILD_SUBDIR:=$DEBIAN_RELEASE}
 
 if [ -z "${OS_VARIANT}" ] ; then
   if [ "$DEBIAN_RELEASE" = "xenial" -o "$DEBIAN_RELEASE" = "bionic" ] ; then
-    OS_VARIANT="ubuntu"
+    OS_VARIANT="ubuntu-ports"
   elif [ "$DEBIAN_RELEASE" = "jessie" -o "$DEBIAN_RELEASE" = "stretch" ] ; then
     OS_VARIANT="debian"
   else
@@ -101,10 +101,11 @@ APT_PROXY=${APT_PROXY:=""}
 if [ -z "${APT_SERVER}" ] ; then
   if [ "$OS_VARIANT" = "debian" ] ; then
     APT_SERVER="ftp.debian.org"
-  elif [ "$OS_VARIANT" = "ubuntu" ] ; then
-    APT_SERVER="launchpad.net"
+  elif [ "$OS_VARIANT" = "ubuntu-ports" ] ; then
+    APT_SERVER="us.ports.ubuntu.com"
   else
     echo -n -e "\n\nerror: no APT_SERVER specified."
+    exit 1
   fi
 fi
 
@@ -148,16 +149,21 @@ CHROOT_SCRIPTS=${CHROOT_SCRIPTS:=""}
 
 if [ "$OS_VARIANT" = "debian" ] ; then
   KEYRING="debian-archive-keyring"
-elif [ "$OS_VARIANT" = "ubuntu "] ; then
-  KEYRING="ubuntu-keyring"
+  KEYRING_PKG=$KEYRING
+elif [ "$OS_VARIANT" = "ubuntu-ports" ] ; then
+  KEYRING="ubuntu-archive-keyring"
+  KEYRING_PKG="ubuntu-keyring"
+else
+  echo -n -e "\n\nerror: no KEYRING specified."
+  exit 1
 fi
 
 # Packages required in the chroot build environment
 APT_INCLUDES=${APT_INCLUDES:=""}
-APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,${KEYRING},systemd"
+APT_INCLUDES="${APT_INCLUDES},apt-transport-https,apt-utils,ca-certificates,${KEYRING_PKG},systemd"
 
 # Packages required for bootstrapping  (host PC)
-REQUIRED_PACKAGES="debootstrap ${KEYRING} qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git"
+REQUIRED_PACKAGES="debootstrap ${KEYRING_PKG} qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git"
 
 MISSING_PACKAGES=""
 

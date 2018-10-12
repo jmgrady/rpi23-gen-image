@@ -2,8 +2,18 @@
 
 ## Introduction
 
-`rpi23-gen-image.sh` is an Debian Linux bootstrapping shell script for generating Debian OS images for Raspberry Pi 2 (RPi2, 32 bit) and Raspberry Pi 3 (RPi3, 64 bit) computers.
+`rpi23-gen-image.sh` is an Debian/Ubuntu Linux bootstrapping shell script for generating Debian/Ubuntu OS images for Raspberry Pi 2 (RPi2, 32 bit) and Raspberry Pi 3 (RPi3, 64 bit) computers.
 
+*Note by Jim Grady:*
+
+This is a fork of the original project by github user "michaelfranzl" which is a fork of another project.  His notes are below.
+This fork adds a few changes to allow:
+ - building an image with Ubuntu.  This has only been tested on a Raspberry Pi 3B at this point.
+ - adds an install-image.sh script to do all the manual steps for copying the resulting image to a microSD card.  See the section *Install the system on a SD card*
+ - adds a few top-level scripts (stretch-rpi3.sh and xenial-rpi3.sh) to build some common configurations that I use.
+
+ **Note:**
+ When running the script to build the xenial image, the script could not locate the deb packages for i2c-tools, rng-tools, hostapd, or dnsmasq.  Once the image is built, apt-get can be used to install the packages without any problems.  Building a Debian image does not have this problem.  Once I have found and resolved the issue, I will remove this message.
 
 *Note by Michael Franzl:*
 
@@ -69,7 +79,7 @@ Set up your working directory:
     cd workspace
 
 Do the following steps as root user.
-    
+
 
 ### Set up caching for apt
 
@@ -80,80 +90,80 @@ This way, you won't have to re-download hundreds of megabytes of Debian packages
 Check its status page:
 
     http://localhost:3142
-    
+
 
 ### Install dependencies
 
 The following list of Debian packages must be installed on the build system because they are essentially required for the bootstrapping process.
 
     apt-get install debootstrap debian-archive-keyring qemu-user-static binfmt-support dosfstools rsync bmap-tools whois git bc device-tree-compiler dbus psmisc python-dev
-    
+
 For a RPi2, you also need:
 
     apt-get install crossbuild-essential-armhf
-    
+
 For a RPi3, you also need:
 
     apt-get install crossbuild-essential-arm64
-    
-    
-    
 
-    
+
+
+
+
 ### Kernel compilation
 
 Get the Linux mainline kernel. This is a very large download, about 2GB. (For a smaller download of about 90 MB, consider downloading the latest stable kernel as .tar.xz from https://kernel.org.)
 
     git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     cd linux
-    
+
 For now, please use exactly this commit ID, which has been confirmed working:
 
 60e8d3e11645a1b9c4197d9786df3894332c1685 (Feb 2017, approx. version 4.10)
 
     git checkout 60e8d3e1
-    
+
 If you run into problems using another commit ID, please do NOT file Issue reports. Instead, please fork this project and contribute back.
 
 Working configuration files for this Linux kernel revision are included in this repository. (`working-rpi2-linux-config.txt` and `working-rpi3-linux-config.txt`).
-    
+
 If you want to generate the default `.config` file that is also working on the Raspberry, execute
 
     make mrproper
-    
+
 For a RPi2:
 
     make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- multi_v7_defconfig
-    
+
 For a RPi3:
-    
+
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig
-    
-    
+
+
 Whichever `.config` file you have at this point, if you want to get more control as to what is enabled in the kernel, you can run the graphical configuration tool at this point:
 
     apt-get install libglib2.0-dev libgtk2.0-dev libglade2-dev
-    
+
 For a RPi2:
 
     make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- gconfig
-    
+
 For a RPi3:
-    
+
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- gconfig
 
-    
+
 Before compiling the kernel, back up your `.config` file so that you don't lose it after the next `make mrproper`:
 
     cp .config ../kernelconfig-backup.txt
-    
+
 
 #### Compiling the kernel
 
 Clean the sources:
 
     make mrproper
-    
+
 Optionally, copy your previously backed up `.config`:
 
     cp ../kernelconfig-backup.txt .config
@@ -161,29 +171,29 @@ Optionally, copy your previously backed up `.config`:
 Find out how many CPU cores you have to speed up compilation:
 
     NUM_CPU_CORES=$(grep -c processor /proc/cpuinfo)
-    
+
 Run the compilation on all CPU cores. This takes about 10 minutes on a modern PC:
 
 For a RPi2:
 
     make -j${NUM_CPU_CORES} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
-    
+
 For a RPi3:
-    
+
     make -j${NUM_CPU_CORES} ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
-    
-    
+
+
 Verify that you have the required kernel image.
 
 For a RPi2 this is:
 
     ./arch/arm/boot/zImage
-    
+
 For a RPi3 this is:
 
     ./arch/arm64/boot/Image.gz
-    
-    
+
+
 ### U-Boot bootloader compilation
 
     cd ..
@@ -194,7 +204,7 @@ For now, please use exactly this commit ID, which has been confirmed working:
 b24cf8540a85a9bf97975aadd6a7542f166c78a3
 
     git checkout b24cf8540a
-    
+
 If you run into problems using another commit ID, please do NOT file Issue reports. Instead, please fork this project and contribute back.
 
 Let's increase the maximum kernel image size from the default (8 MB) to 64 MB. This way, u-boot will be able to boot even larger kernels. Edit `./u-boot/include/configs/rpi.h` and add above the very last line (directly above "#endif"):
@@ -208,17 +218,17 @@ Find out how many CPU cores you have to speed up compilation:
 Compile for a RPi model 2 (32 bits):
 
     make -j${NUM_CPU_CORES} ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- rpi_2_defconfig all
-    
+
 Compile for a RPi model 3 (64 bits):
-    
+
     make -j${NUM_CPU_CORES} ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- rpi_3_defconfig all
-    
+
 Verify that you have the required bootloader file:
 
     ./u-boot.bin
 
 
-    
+
 ### Pre-download Raspberry firmware
 
 The Raspberry Pi still needs some binary proprietary blobs for booting. Get them:
@@ -233,10 +243,10 @@ The Raspberry Pi still needs some binary proprietary blobs for booting. Get them
     wget https://github.com/raspberrypi/firmware/raw/master/boot/start_cd.elf
     wget https://github.com/raspberrypi/firmware/raw/master/boot/start.elf
     wget https://github.com/raspberrypi/firmware/raw/master/boot/start_x.elf
-    
+
 Confirmed working revision: bf5201e9682bf36370bc31d26b37fd4d84e1cfca
-    
-    
+
+
 ### Build the system!
 
 
@@ -267,7 +277,7 @@ You may want to modify the variables according to the section "Command-line para
 The file `example.sh` in this repostory contains a working example for RPi3.
 
 
-    
+
 ### Install the system on a SD card
 
 Insert a SD card into the card reader of your host PC. You'll need two partitions on it. I'll leave as an exercise for the reader the creation of a  partition table according to the following output of `fdisk` for a 32GB card:
@@ -294,12 +304,12 @@ The following commands will erase all contents of the SD card and install the sy
 
     umount /dev/mmcblk0p1
     umount /dev/mmcblk0p2
-    
+
 
 *Note about SD cards:* Cheap (or sometimes even professional) SD cards can be weird at times. I've repeatedly noticed corrupt/truncated files even after proper rsync and proper umount on different brand new SD cards. TODO: Add a method to verify all file checksums after rsync.
 
 
-    
+
 ### Try booting the Raspberry
 
 Insert the SD card into the Raspberry Pi, and if everything went well, you should see a console-based login prompt on the screen. Login with the login details you've passed into the script (USER_NAME and PASSWORD).
@@ -352,8 +362,8 @@ To use the green ACT LED as an indicator for disc access, execute:
 To toggle the red PWR LED:
 
     echo 0 > /sys/class/leds/PWR/brightness # Turn off
-    echo 1 > /sys/class/leds/PWR/brightness # Turn on 
-    
+    echo 1 > /sys/class/leds/PWR/brightness # Turn on
+
 Or use the red PWR LED as heartbeat indicator:
 
     echo heartbeat > /sys/class/leds/PWR/trigger
@@ -363,8 +373,8 @@ Or use the red PWR LED as heartbeat indicator:
 
 If `ENABLE_WIRELESS` was set to `true` during install, the WLAN interface should be detected. Inspect if `lsmod` lists the module `brcmfmac`. Also check if `networkctl` lists `wlan0`. It *should* be straightforward from here to set up a wireless network connection.
 
-    
-    
+
+
 #### Notes about systemd
 
 `systemd` now replaces decades-old low-level system administration tools. Here is a quick cheat sheet:
@@ -372,23 +382,23 @@ If `ENABLE_WIRELESS` was set to `true` during install, the WLAN interface should
 Reboot machine:
 
     systemctl reboot
-    
+
 Halt machine (this actually turns off the RPi):
 
     systemctl halt
-    
+
 Show all networking interfaces:
 
     networkctl
-    
+
 Show status of the Ethernet adapter:
 
     networkctl status eth0
-    
+
 Show status of the local DNS caching client:
 
     systemctl status systemd-resolved
-    
+
 
 #### Install GUI
 
@@ -400,8 +410,8 @@ If you want to install a graphical user interface, I would suggest the light-wei
 
 Reboot, and you should be greeted by the LightDM greeter screen!
 
-    
-    
+
+
 #### Test GPU acceleration via VC4 kernel driver
 
 Successfully tested on the RPi2 and RPI3.
@@ -409,7 +419,7 @@ Successfully tested on the RPi2 and RPI3.
     apt-get install mesa-utils
     glxgears
     glxinfo | grep '^OpenGL'
-    
+
 Glxinfo should output:
 
     OpenGL vendor string: Broadcom
@@ -420,10 +430,10 @@ Glxinfo should output:
     OpenGL ES profile shading language version string: OpenGL ES GLSL ES 1.0.16
 
 
-    
 
 
-    
+
+
 ### Kernel compilation directly on the Rasberry
 
 Only successfully tested on the RPi2. Not yet tested on the RPI3.
@@ -434,7 +444,7 @@ In case you want to compile and deploy another Mainline Linux kernel directly on
     make modules_install
 
 
-    
+
 
 ## Documentation of all command-line parameters
 

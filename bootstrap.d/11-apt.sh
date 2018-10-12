@@ -11,12 +11,17 @@ if [ -z "$APT_PROXY" ] ; then
   sed -i "s/\"\"/\"${APT_PROXY}\"/" "${ETC_DIR}/apt/apt.conf.d/10proxy"
 fi
 
-install_readonly files/apt/sources.list "${ETC_DIR}/apt/sources.list"
+if [ "$OS_VARIANT" = "debian" ] ; then
+  install_readonly files/apt/sources.list "${ETC_DIR}/apt/sources.list"
+elif [ "$OS_VARIANT" = "ubuntu-ports" ] ; then
+  install_readonly files/apt/ubuntu-sources.list "${ETC_DIR}/apt/sources.list"
+else
+  echo -n -e "\n\nerror: no OS_VARIANT specified."
+fi
 
 # Use specified APT server and release
-sed -i "s/\/ftp.debian.org\//\/${APT_SERVER}\//" "${ETC_DIR}/apt/sources.list"
-sed -i "s/\/debian/\/${OS_VARIANT}/" "${ETC_DIR}/apt/sources.list"
-sed -i "s/ jessie/ ${DEBIAN_RELEASE}/" "${ETC_DIR}/apt/sources.list"
+sed -i "s/\%APT_SERVER\%/${APT_SERVER}/" "${ETC_DIR}/apt/sources.list"
+sed -i "s/ \%DEBIAN_RELEASE\%/ ${DEBIAN_RELEASE}/" "${ETC_DIR}/apt/sources.list"
 
 
 # Allow the installation of non-free Debian packages

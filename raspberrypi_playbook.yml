@@ -1,0 +1,5 @@
+---
+  # playbook to setup a Raspberry Pi for Language Forge
+  # need to install the following packages:
+  # i2c-tools,rng-tools,wpasupplicant,wireless-regdb,hostapd,dnsmasq
+  
