@@ -78,8 +78,8 @@ if [[ $resp == "" || $resp == [yY]* ]] ; then
     # now let's get to work!  Assumes that the partitions are already set up.
     runcommand umount ${HOST_BOOT_DEV}
     runcommand umount ${HOST_ROOT_DEV}
-    runcommand mkfs.vfat ${HOST_BOOT_DEV}
-    runcommand mkfs.ext4 ${HOST_ROOT_DEV}
+    runcommand mkfs.vfat -n "BOOT" ${HOST_BOOT_DEV}
+    runcommand mkfs.ext4 -L "rootfs" ${HOST_ROOT_DEV}
     if [ -d /mnt/raspcard ] ; then
        runcommand mkdir -p /mnt/raspcard
     fi
