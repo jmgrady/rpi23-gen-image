@@ -52,11 +52,17 @@ while [ "$#" -gt 0 ] ;
 do
     case "$1" in
 	--test)   TEST="echo";;
+  --host=*) if [[ "$1" =~ --host=(.*) ]] ; then
+              HOSTNAME=${BASH_REMATCH[1]}
+            else
+              echo -e "Could not find hostname."
+            fi;;
   --host)   HOSTNAME=$2
             shift;;
 	-?)			  printUsage;;
 	--help)		printUsage;;
-	*)        IMAGE=$1;;
+	*)        echo -e "Setting IMAGE to $1"
+            IMAGE=$1;;
     esac
     shift
 done
